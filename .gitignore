@@ -1,0 +1,75 @@
+# Ignore Visual Studio Code and Rider directories
+.vscode/
+.idea/
+
+# Ignore compiled files and directories
+bin/
+obj/
+
+# Ignore user-specific files
+*.user
+*.suo
+*.suo
+*.userprefs
+*.sln.docstates
+
+# Ignore NuGet package folder
+packages/
+
+# Ignore build output
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
+[Bb]in/
+[Ll]og/
+[Ll]ogs/
+
+# Ignore Visual Studio files
+*.user
+*.userosscache
+*.suo
+*.sln.docstates
+*.userprefs
+*.suo
+*.cache
+
+# Ignore Rider files
+.idea/
+*.sln.iml
+*.suo
+*.user
+*.userosscache
+*.suo
+*.userprefs
+
+# Ignore Rider generated files
+.idea/assetWizardSettings.xml
+.idea/dictionaries
+.idea/inspectionProfiles
+.idea/misc.xml
+.idea/modules.xml
+.idea/scopes
+.idea/uiDesigner.xml
+/Users/radek/Projects/Tree-KeyPer/Tree_KeyPer/.idea
+
+# Ignore Rider workspace.xml file
+.idea/workspace.xml
+
+# Ignore Rider-based .gitignore file
+.idea/.gitignore
+.idea/.name
+
+# Ignore generated files
+[Tt]humbs.db
+*.dbmdl
+*.dbproj.schemaview
+*.pfx
+*.publishsettings
+node_modules/
+*.DS_Store
