@@ -2,16 +2,29 @@ namespace Tree_KeyPer.Services;
 
 public class Service
 {
-    public string Name { get; }
-    public string AccountName { get; }
-    public string Password { get; }
-    public DateTime? ExpirationDate { get; }
+    public int Id { get; set; }
+    public string Name { get; set; }
+    public string? EmailAddress { get; set; }
+    public string? WwwAddress { get; set; }
+    public string? Login { get; set; }
+    public string? Password { get; set; }
+    public DateTime? ExpirationDate { get; set; }
+    public Service? LoggedWith { get; set; }
+    public string Type { get; set; }
+    public string UserName { get; set; }
 
-    public Service(string name, string accountName, string password, DateTime? expiration)
+    public Service(int id, string name, string? emailAddress, string? wwwAddress, string? login, string? password,
+        DateTime? expirationDate, Service? loggedWith, string type, string userName)
     {
+        Id = id;
         Name = name;
-        AccountName = accountName;
+        EmailAddress = emailAddress;
+        WwwAddress = wwwAddress;
+        Login = login;
         Password = password;
-        ExpirationDate = expiration;
+        ExpirationDate = expirationDate;
+        LoggedWith = loggedWith;
+        Type = type;
+        UserName = userName;
     }
 }
