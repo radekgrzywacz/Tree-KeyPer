@@ -1,10 +1,11 @@
-﻿using Tree_KeyPer.Services;
-using Tree_KeyPer.Tree_Data_Structure;
+﻿using Tree_KeyPer;
 
 class Program
 {
-    public static void Main(string[] args)
+    
+    public static async Task Main(string[] args)
     {
-        
+        var console = new ConsoleOutput();
+        await console.StartProgram();
     }
 }

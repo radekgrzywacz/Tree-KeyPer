@@ -6,17 +6,11 @@ public class TreeNode<T> : IEnumerable
 {
     public T Data { get; set; }
     public List<TreeNode<T>> Children { get; set; } = new List<TreeNode<T>>();
-    public TreeNode<T> Parent { get; set; }
+    public List<TreeNode<T>> Parents { get; set; } = new List<TreeNode<T>>();
 
     public TreeNode(T data)
     {
         Data = data;
-    }
-
-    public void AddChild(TreeNode<T> child)
-    {
-        child.Parent = this;
-        Children.Add(child);
     }
     
     
