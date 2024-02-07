@@ -1,3 +1,5 @@
+using PK3_project;
+
 namespace Tree_KeyPer;
 
 public class ConsoleOutput
@@ -5,6 +7,8 @@ public class ConsoleOutput
     private SqlDataAccess sql = new SqlDataAccess();
     public async Task StartProgram()
     {
+        // Choosing user
+        User user = null;
         Console.WriteLine("Hi, welcome to Tree-KeyPer. Please log-in or create new user account.");
         Console.WriteLine("Press 1 if you want to log into existing user or 2 if you want to create new user.");
         string userInput;
@@ -17,7 +21,34 @@ public class ConsoleOutput
         switch (userInput)
         {
             case "1":
-                await logIn();
+                user = await LogIn();
+                break;
+            case "2":
+                user = await CreateAccount();
+                break;
+            default:
+                Console.WriteLine("df");
+                break;
+        }
+
+        var nodes = await sql.GetUsersServicesAsync(user.login);
+
+        
+        // Main part
+        Console.WriteLine("What do you want to do? \n 1. Check your services, 2. Add new service");
+        do
+        {
+            Console.WriteLine("Insert a number:");
+            userInput = Console.ReadLine();
+        } while (userInput != "1" && userInput != "2");
+        
+        switch (userInput)
+        {
+            case "1":
+                
+                break;
+            case "2":
+                
                 break;
             default:
                 Console.WriteLine("df");
@@ -27,7 +58,7 @@ public class ConsoleOutput
 
     }
 
-    public async Task logIn()
+    public async Task<User> LogIn()
     {
         User user = null;
         bool isUserValid = true;
@@ -45,7 +76,7 @@ public class ConsoleOutput
             }
             catch (InvalidOperationException ex)
             {
-                Console.WriteLine($"Wrong login AGAIN!!! Exception: {ex.Message}");
+                Console.WriteLine("There is no account that uses this login or password");
                 isUserValid = false;
             }
 
@@ -67,5 +98,40 @@ public class ConsoleOutput
             }
         } while (!isUserValid);
 
+        return user;
+
     }
+
+    public async Task<User> CreateAccount()
+    {
+        bool isValidLogin = true;
+        Console.WriteLine("We're happy that you want to join us!");
+
+        string login;
+        do
+        {
+            isValidLogin = true;
+            Console.WriteLine("Insert your login:");
+            login = Console.ReadLine();
+
+            Console.WriteLine("Insert your password");
+            var password = Console.ReadLine();
+
+            try
+            {
+                await sql.CreateUser(login, password);
+            }
+            catch (Npgsql.PostgresException ex)
+            {
+                // var logger = new Logger();
+                // logger.Log(ex.Message);
+                isValidLogin = false;
+            }
+        } while (!isValidLogin);
+
+        return await sql.SearchForUserAsync(login);
+    }
+    
+    
+    
 }

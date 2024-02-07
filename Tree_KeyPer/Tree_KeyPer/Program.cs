@@ -7,5 +7,7 @@ class Program
     {
         var console = new ConsoleOutput();
         await console.StartProgram();
+        var sql = new SqlDataAccess();
+        
     }
 }
