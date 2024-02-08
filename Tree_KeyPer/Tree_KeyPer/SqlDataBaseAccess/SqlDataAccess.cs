@@ -46,15 +46,18 @@ public class SqlDataAccess
 
             foreach (var node in nodes)
             {
-                var sql = $"SELECT child_id FROM node_relations WHERE parent_id = {node.Data.Id}";
-                var children_ids = await conn.QueryAsync<int>(sql);
+                var childrenIds = await conn.QueryAsync<int>(
+                    $"SELECT child_id FROM node_relations WHERE parent_id = {node.Data.Id}");
 
-                foreach (var id in children_ids)
+                var children = nodes.Where(n => childrenIds.Contains(n.Data.Id)).ToList();
+                foreach (var child in children)
                 {
-                    node.Children.Add(nodes.FirstOrDefault(n => n.Data.Id == id));
-                    nodes.FirstOrDefault(n => n.Data.Id == id).Parents.Add(node);
+                    node.Children.Add(child);
+                    child.Parents.Add(node);
                 }
             }
+
+            Console.WriteLine("sda");
         }   
     }
 

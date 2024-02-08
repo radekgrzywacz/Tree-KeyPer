@@ -1,7 +1,3 @@
-namespace PK3_project;
-using System;
-using System.IO;
-
 public class Logger : LogBase
 {
    private string CurrentDirectory { get; set; }

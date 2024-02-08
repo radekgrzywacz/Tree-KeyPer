@@ -6,8 +6,10 @@ class Program
     public static async Task Main(string[] args)
     {
         var console = new ConsoleOutput();
-        await console.StartProgram();
+       // await console.StartProgram();
         var sql = new SqlDataAccess();
-        
+        var nodes = await sql.GetUsersServicesAsync("Radek");
+        console.CheckSpecificService(nodes);
+
     }
 }
