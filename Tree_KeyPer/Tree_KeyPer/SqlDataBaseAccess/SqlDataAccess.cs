@@ -86,4 +86,53 @@ public class SqlDataAccess
         }
     }
 
+    public async Task<List<string>> GetTypesAsync()
+    {
+        using (NpgsqlConnection conn = new NpgsqlConnection(_connectionString))
+        {
+            var sql = "SELECT name FROM groups;";
+
+            var types = await conn.QueryAsync<string>(sql);
+
+            return types.ToList();
+        }
+    }
+
+    public async Task AddUserAsync(string name, string? emailAddres, string? wwwAddress, string? login, string? password, DateTime? expirationDate, int? loggedWithId, string type, string userName)
+    {
+        using (NpgsqlConnection conn = new NpgsqlConnection(_connectionString))
+        {
+            var sql =
+                $"INSERT INTO node (name, email_address, www_address, login, password, expiration_date, logged_with, type, user_name) " +
+                $"VALUES ('{name}', '{emailAddres}', '{wwwAddress}', '{login}', '{password}', '{expirationDate}',{loggedWithId}, '{type}', '{userName}')";
+            
+            await conn.ExecuteAsync(sql);
+            
+            Console.WriteLine("Service added.");
+        }
+    }
+
+    public async Task<int> SearchForService(string serviceName, string userName)
+    {
+        using (NpgsqlConnection conn = new NpgsqlConnection(_connectionString))
+        {
+            var sql = $"SELECT id FROM node WHERE name = '{serviceName}', user_name = '{userName}';";
+
+            var id = await conn.QuerySingleAsync<int>(sql);
+
+            return id;
+        }
+    }
+
+    public async Task CreateRelation(int parentId, int childId)
+    {
+        using (NpgsqlConnection conn = new NpgsqlConnection(_connectionString))
+        {
+            var sql = $"INSERT INTO node_relations (parent_id, child_id) VALUES ({parentId},{childId});";
+
+            await conn.ExecuteAsync(sql);
+
+            Console.WriteLine("Relation created.");
+        }
+    }
 }
