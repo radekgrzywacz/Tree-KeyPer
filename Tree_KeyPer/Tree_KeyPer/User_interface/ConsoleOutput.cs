@@ -1,5 +1,4 @@
-using System.Security.Claims;
-using Npgsql;
+using ExtentoinMethods;
 using Tree_KeyPer.Services;
 using Tree_KeyPer.Tree_Data_Structure;
 
@@ -51,7 +50,7 @@ public class ConsoleOutput
                 CheckServices(nodes);   // TODO: Finish listing
                 break;
             case "2":
-                ManageServices(user, nodes);
+                await ManageServices(user, nodes);
                 break;
             default:
                 Console.WriteLine("df");
@@ -286,14 +285,19 @@ public class ConsoleOutput
         }
         Console.Write("Email address: ");
         string? emailAddress = Console.ReadLine();
+        emailAddress = emailAddress.NullIfEmpty();
         Console.Write("WWW address: ");
         string? WwwAddress = Console.ReadLine();
+        WwwAddress = WwwAddress.NullIfEmpty();
         Console.Write("Login: ");
         string? login = Console.ReadLine();
+        login = login.NullIfEmpty();
         Console.Write("Password: ");
         string? password = Console.ReadLine();
+        password = password.NullIfEmpty();
         Console.Write("Expires: ");
         string? date = Console.ReadLine();
+        date = date.NullIfEmpty();
         DateTime? expirationDate = null;
         if (!string.IsNullOrEmpty(date))
         {
@@ -314,20 +318,29 @@ public class ConsoleOutput
         
         Console.Write("Service used for logging in: ");
         string? loggedWith = Console.ReadLine();
-        int logged_with_id = nodes.FirstOrDefault(n => n.Data.Name == loggedWith).Data.Id;
+        loggedWith = loggedWith.NullIfEmpty();
+        int? logged_with_id;
+        if (!string.IsNullOrEmpty(loggedWith))
+        {
+            logged_with_id = nodes.FirstOrDefault(n => n.Data.Name == loggedWith).Data.Id;
+        }
+        else
+        {
+            logged_with_id = null;
+        }
 
         var types = await sql.GetTypesAsync();
         Console.WriteLine($"Choose type of your service: {string.Join(", ", types)}");
-        string type = null;
+        string type;
         do
         {
-            Console.Write("Insert type: ");
+            Console.WriteLine("Insert type: ");
             type = Console.ReadLine();
         } while (!types.Contains(type));
 
         string userName = user.login;
 
-        await sql.AddUserAsync(serviceName, emailAddress, WwwAddress, login, password, expirationDate, 
+        await sql.AddServiceAsync(serviceName, emailAddress, WwwAddress, login, password, expirationDate, 
             logged_with_id, type, userName);
 
         int serviceId = await sql.SearchForService(serviceName, userName);
@@ -350,7 +363,7 @@ public class ConsoleOutput
             }
             else
             {
-                Console.WriteLine("You have to answer 'y' or 'n'.");
+                Console.WriteLine("\nYou have to answer 'y' or 'n'.");
             }
         }
 
@@ -374,7 +387,7 @@ public class ConsoleOutput
                 do
                 {
                     Console.Write(
-                        "Please insert the name of the service you want to create a relation with or 'l' to list your services:");
+                        "\nPlease insert the name of the service you want to create a relation with or 'l' to list your services:");
                     string userInput = Console.ReadLine();
                     if (userInput == "l")
                     {
@@ -402,7 +415,7 @@ public class ConsoleOutput
                 do
                 {
                     Console.Write(
-                        "Please insert the name of the service you want to create a relation with or 'l' to list your services:");
+                        "\nPlease insert the name of the service you want to create a relation with or 'l' to list your services:");
                     string userInput = Console.ReadLine();
                     if (userInput == "l")
                     {
@@ -424,7 +437,7 @@ public class ConsoleOutput
             }
             else
             {
-                Console.WriteLine("You have to enter '1' or '2'.");
+                Console.WriteLine("\nYou have to enter '1' or '2'.");
             }
         }
     }

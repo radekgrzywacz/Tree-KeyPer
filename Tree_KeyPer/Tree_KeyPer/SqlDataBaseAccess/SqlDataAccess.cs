@@ -98,16 +98,27 @@ public class SqlDataAccess
         }
     }
 
-    public async Task AddUserAsync(string name, string? emailAddres, string? wwwAddress, string? login, string? password, DateTime? expirationDate, int? loggedWithId, string type, string userName)
+    public async Task AddServiceAsync(string name, string? emailAddres, string? wwwAddress, string? login, string? password, DateTime? expirationDate, int? loggedWithId, string type, string userName)
     {
         using (NpgsqlConnection conn = new NpgsqlConnection(_connectionString))
         {
             var sql =
-                $"INSERT INTO node (name, email_address, www_address, login, password, expiration_date, logged_with, type, user_name) " +
-                $"VALUES ('{name}', '{emailAddres}', '{wwwAddress}', '{login}', '{password}', '{expirationDate}',{loggedWithId}, '{type}', '{userName}')";
-            
-            await conn.ExecuteAsync(sql);
-            
+                $"INSERT INTO node (name, email_address, www_address, login, password, expiration_date, logged_with_id, type, user_name) " +
+                $"VALUES (@name, @email, @www, @login, @password, @expiration, @loggedWithId, @type, @userName)";
+
+            await conn.ExecuteAsync(sql, new
+            {
+                name,
+                email = (object)emailAddres ?? DBNull.Value,
+                www = (object)wwwAddress ?? DBNull.Value,
+                login = (object)login ?? DBNull.Value,
+                password = (object)password ?? DBNull.Value,
+                expiration = (object)expirationDate ?? DBNull.Value,
+                loggedWithId,
+                type,
+                userName
+            });
+
             Console.WriteLine("Service added.");
         }
     }
@@ -116,7 +127,7 @@ public class SqlDataAccess
     {
         using (NpgsqlConnection conn = new NpgsqlConnection(_connectionString))
         {
-            var sql = $"SELECT id FROM node WHERE name = '{serviceName}', user_name = '{userName}';";
+            var sql = $"SELECT id FROM node WHERE name = '{serviceName}' AND user_name = '{userName}';";
 
             var id = await conn.QuerySingleAsync<int>(sql);
 
