@@ -135,6 +135,19 @@ public class SqlDataAccess
         }
     }
 
+    public async Task<int> GetNewestServiceId()
+    {
+        using (NpgsqlConnection conn = new NpgsqlConnection(_connectionString))
+        {
+            var sql = $"SELECT id FROM node ORDER BY id DESC LIMIT 1;";
+
+            var id = await conn.QuerySingleAsync<int>(sql);
+
+            return id;
+
+        }
+    }
+
     public async Task CreateRelation(int parentId, int childId)
     {
         using (NpgsqlConnection conn = new NpgsqlConnection(_connectionString))

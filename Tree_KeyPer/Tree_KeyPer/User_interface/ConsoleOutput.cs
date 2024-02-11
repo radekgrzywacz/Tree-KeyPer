@@ -343,13 +343,13 @@ public class ConsoleOutput
         await sql.AddServiceAsync(serviceName, emailAddress, WwwAddress, login, password, expirationDate, 
             logged_with_id, type, userName);
 
-        int serviceId = await sql.SearchForService(serviceName, userName);
+        int serviceId = await sql.GetNewestServiceId();
 
         ConsoleKeyInfo userAnswer;
         bool isValid = false;
         while(!isValid)
         {
-            Console.WriteLine("Do you want to create a relation with other services? (y/n)");
+            Console.WriteLine("\nDo you want to create a relation with other services? (y/n)");
             userAnswer = Console.ReadKey();
             if (userAnswer.KeyChar == 'y' || userAnswer.KeyChar == 'Y')
             {
@@ -375,70 +375,59 @@ public class ConsoleOutput
         ConsoleKeyInfo key;
         bool isValid = false;
 
-        while (!isValid)
+        do // Nieskończona pętla i dziwne przejście między listingiem a wprowadzaniem serwisu
         {
-            Console.WriteLine("Does this service uses (1) or being used by (2) the service you want to connect it?");
-            Console.Write("Enter number: ");
-            key = Console.ReadKey();
-            if (key.KeyChar == '1')
+            Console.WriteLine("\nDoes this service uses (1) or being used by (2) the service you want to connect it?");
+            do
             {
-                // Set parents
-                bool isValidSerivce = true;
-                do
-                {
-                    Console.Write(
-                        "\nPlease insert the name of the service you want to create a relation with or 'l' to list your services:");
-                    string userInput = Console.ReadLine();
-                    if (userInput == "l")
-                    {
-                        ListServices(nodes);
-                    }
-                    else
-                    {
-                        var id = nodes.FirstOrDefault(n => n.Data.Name == userInput).Data.Id;
-                        if (id == null)
-                        {
-                            isValidSerivce = false;
-                        }
-                        else
-                        {
-                            await sql.CreateRelation(id, serviceId);
-                        }
-                    }
-                } while (!isValidSerivce);
+                Console.Write("Enter number: ");
+                key = Console.ReadKey();
+            } while (key.KeyChar != '1' && key.KeyChar != '2');
 
-            }
-            else if (key.KeyChar == '2')
+            Console.Write(
+                "\nPlease insert the name of the service you want to create a relation with or 'l' to list your services: ");
+            string userInput = Console.ReadLine();
+
+            if (userInput == "l")
             {
-                // Set children
-                bool isValidSerivce = true;
-                do
+                ListServices(nodes);
+                Console.Write("Enter name of the service: ");
+                userInput = Console.ReadLine();
+            }
+            
+            if (nodes.Contains(nodes.FirstOrDefault(n => n.Data.Name == userInput)))
+            {
+                int id = nodes.FirstOrDefault(n => n.Data.Name == userInput).Data.Id;
+                if (key.KeyChar == '1')
                 {
-                    Console.Write(
-                        "\nPlease insert the name of the service you want to create a relation with or 'l' to list your services:");
-                    string userInput = Console.ReadLine();
-                    if (userInput == "l")
-                    {
-                        ListServices(nodes);
-                    }
-                    else
-                    {
-                        var id = nodes.FirstOrDefault(n => n.Data.Name == userInput).Data.Id;
-                        if (id == null)
-                        {
-                            isValidSerivce = false;
-                        }
-                        else
-                        {
-                            await sql.CreateRelation(serviceId, id);
-                        }
-                    }
-                } while (!isValidSerivce);
+                    await sql.CreateRelation(id, serviceId);
+                    isValid = true;
+                }
+                else
+                {
+                    await sql.CreateRelation(serviceId, id);
+                    isValid = true;
+                }
             }
             else
             {
-                Console.WriteLine("\nYou have to enter '1' or '2'.");
+                Console.WriteLine("Wrong service name");
             }
-        }
+
+            Console.Write("Do you want to create relation with other service? (y/n): ");
+            key = Console.ReadKey();
+            Console.WriteLine();
+            while (key.KeyChar != 'y' && key.KeyChar != 'n')
+            {
+                Console.WriteLine("Wrong input");
+                key = Console.ReadKey();
+                Console.WriteLine();
+            }
+
+            if (key.KeyChar == 'y')
+            {
+                isValid = false;
+            }
+        } while (!isValid);
     }
 }
