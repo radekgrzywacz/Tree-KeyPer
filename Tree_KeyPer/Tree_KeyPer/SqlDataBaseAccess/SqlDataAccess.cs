@@ -56,8 +56,6 @@ public class SqlDataAccess
                     child.Parents.Add(node);
                 }
             }
-
-            Console.WriteLine("sda");
         }   
     }
 
@@ -157,6 +155,20 @@ public class SqlDataAccess
             await conn.ExecuteAsync(sql);
 
             Console.WriteLine("Relation created.");
+        }
+    }
+
+    public async Task RemoveService(int id, string serviceName, string userName)
+    {
+        using (NpgsqlConnection conn = new NpgsqlConnection(_connectionString))
+        {
+            var sql = $"DELETE FROM node_relations WHERE parent_id = {id} OR child_id = {id}" ;
+            await conn.ExecuteAsync(sql);
+            
+            sql = $"DELETE FROM node WHERE name = '{serviceName}' AND user_name = '{userName}'";
+            await conn.ExecuteAsync(sql);
+
+            Console.WriteLine("Service deleted");
         }
     }
 }

@@ -56,8 +56,6 @@ public class ConsoleOutput
                 Console.WriteLine("df");
                 break;
         }
-
-
     }
 
     public async Task<User> LogIn()
@@ -132,6 +130,7 @@ public class ConsoleOutput
         return await sql.SearchForUserAsync(login);
     }
 
+    // TODO: SWITCH CASE 2
     public async void CheckServices(List<TreeNode<Service>> nodes)
     {
         Console.WriteLine("Do you want to check a specific one (1), list your all services (2)");
@@ -184,30 +183,7 @@ public class ConsoleOutput
                 continue;
             }
 
-            Console.WriteLine($"----{service.Data.Name}-----");
-            Console.WriteLine($"-> Login: {service.Data.Login}");
-            Console.WriteLine($"-> Password: {service.Data.Password}");
-            Console.WriteLine($"-> Email address: {service.Data.Email_Address}");
-            Console.WriteLine($"-> WWW address: {service.Data.Www_Address}");
-            Console.WriteLine($"-> Expires: {service.Data.Expiration_Date}");
-            try
-            {
-                Console.WriteLine(
-                    $"-> Logged with service: {nodes.FirstOrDefault(n => n.Data.Id == service.Data.Logged_With_id).Data.Name}");
-            }
-            catch (NullReferenceException ex)
-            {
-                Console.WriteLine(
-                    $"-> Logged with service:");
-                var log = new Logger();
-                log.Log(ex.Message);
-            }
-
-            Console.WriteLine($"-> Type: {service.Data.Type}");
-            var childrenNames = service.Children.Select(c => c.Data.Name);
-            Console.WriteLine($"-> Used by: {string.Join(", ", childrenNames)}");
-            var parentsNames = service.Parents.Select(p => p.Data.Name);
-            Console.WriteLine($"-> Used by: {string.Join(", ", parentsNames)}");
+            DisplayService(service, nodes);
             
 
             Console.WriteLine("Would you like to check something else? (y/n)");
@@ -216,11 +192,46 @@ public class ConsoleOutput
                 userInput = Console.ReadLine();
             } while (userInput != "y" && userInput != "n");
 
-            if (userInput == "y") isInputValid = false;
+            if (userInput == "y")
+            {
+                isInputValid = false;
+            }
+            else
+            {
+                break;
+            }
 
 
 
         } while (!isInputValid);
+    }
+
+    public void DisplayService(TreeNode<Service> service, List<TreeNode<Service>> nodes)
+    {
+        Console.WriteLine($"----{service.Data.Name}-----");
+        Console.WriteLine($"-> Login: {service.Data.Login}");
+        Console.WriteLine($"-> Password: {service.Data.Password}");
+        Console.WriteLine($"-> Email address: {service.Data.Email_Address}");
+        Console.WriteLine($"-> WWW address: {service.Data.Www_Address}");
+        Console.WriteLine($"-> Expires: {service.Data.Expiration_Date}");
+        try
+        {
+            Console.WriteLine(
+                $"-> Logged with service: {nodes.FirstOrDefault(n => n.Data.Id == service.Data.Logged_With_id).Data.Name}");
+        }
+        catch (NullReferenceException ex)
+        {
+            Console.WriteLine(
+                $"-> Logged with service:");
+            var log = new Logger();
+            log.Log(ex.Message);
+        }
+
+        Console.WriteLine($"-> Type: {service.Data.Type}");
+        var childrenNames = service.Children.Select(c => c.Data.Name);
+        Console.WriteLine($"-> Used by: {string.Join(", ", childrenNames)}");
+        var parentsNames = service.Parents.Select(p => p.Data.Name);
+        Console.WriteLine($"-> Used by: {string.Join(", ", parentsNames)}");
     }
 
     public void ListServices(List<TreeNode<Service>> nodes)
@@ -231,7 +242,8 @@ public class ConsoleOutput
             Console.Write(node.Equals(last) ? $"{node.Data.Name}" : $"{node.Data.Name}, ");
         }
     }
-
+    
+    // TODO:
     public void SearchTree(List<TreeNode<Service>> nodes)
     {
         // for (int i = 0; i < nodes.Count; i++)
@@ -262,7 +274,7 @@ public class ConsoleOutput
                 await AddSerivce(user, nodes);
                 break;
             case "2":
-                // TODO: deleting
+                await DeleteService(user, nodes);
                 break;
             default:
                 Console.WriteLine("df");
@@ -343,6 +355,7 @@ public class ConsoleOutput
         await sql.AddServiceAsync(serviceName, emailAddress, WwwAddress, login, password, expirationDate, 
             logged_with_id, type, userName);
 
+        nodes = await sql.GetUsersServicesAsync(userName);
         int serviceId = await sql.GetNewestServiceId();
 
         ConsoleKeyInfo userAnswer;
@@ -370,12 +383,60 @@ public class ConsoleOutput
 
     }
 
+    public async Task DeleteService(User user, List<TreeNode<Service>> nodes)
+    {
+        Console.WriteLine("Insert name of the service you want to delete or write 'l' to list your services:");
+        var serviceName = Console.ReadLine();
+        if (serviceName == "l")
+        {
+            ListServices(nodes);
+            Console.WriteLine("\nEnter name of the service: ");
+            serviceName = Console.ReadLine();
+        }
+        var service = nodes.FirstOrDefault(n => n.Data.Name == serviceName);
+
+        while (service == null)
+        {
+            Console.WriteLine("We couldn't find your service. Try again:");
+            serviceName = Console.ReadLine();
+            service = nodes.FirstOrDefault(n => n.Data.Name == serviceName);
+        }
+
+        Console.WriteLine("Are sure that you want to delete service given below?");
+        DisplayService(service, nodes);
+
+        bool isValidInput = false;
+        while (!isValidInput)
+        {
+            Console.WriteLine("y/n:");
+            var choice = Console.ReadKey();
+            Console.WriteLine();
+
+            if (choice.KeyChar == 'y')
+            {
+                await sql.RemoveService(service.Data.Id, serviceName, user.login);
+                nodes.Remove(service);
+                isValidInput = true;
+            }
+            else if (choice.KeyChar == 'n')
+            {
+                isValidInput = true;
+            }
+            else
+            {
+                Console.WriteLine("Wrong input.");
+            }
+        }
+
+
+    }
+
     public async Task CreateRelation(int serviceId, List<TreeNode<Service>> nodes)
     {
         ConsoleKeyInfo key;
         bool isValid = false;
 
-        do // Nieskończona pętla i dziwne przejście między listingiem a wprowadzaniem serwisu
+        do
         {
             Console.WriteLine("\nDoes this service uses (1) or being used by (2) the service you want to connect it?");
             do
@@ -391,7 +452,7 @@ public class ConsoleOutput
             if (userInput == "l")
             {
                 ListServices(nodes);
-                Console.Write("Enter name of the service: ");
+                Console.WriteLine("Enter name of the service: ");
                 userInput = Console.ReadLine();
             }
             
