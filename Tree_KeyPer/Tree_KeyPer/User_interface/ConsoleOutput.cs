@@ -352,8 +352,38 @@ public class ConsoleOutput
 
         string userName = user.login;
 
-        await sql.AddServiceAsync(serviceName, emailAddress, WwwAddress, login, password, expirationDate, 
-            logged_with_id, type, userName);
+        bool isValidServiceName = false;
+        while (!isValidServiceName)
+        {
+            try
+            {
+                await sql.AddServiceAsync(serviceName, emailAddress, WwwAddress, login, password, expirationDate,
+                    logged_with_id, type, userName);
+                isValidServiceName = true;
+            }
+            catch (Npgsql.PostgresException ex)
+            {
+                if (ex.Message.Contains("unique_name_for_user"))
+                {
+                    Console.WriteLine("Service with given name already exists. Please insert a new one:");
+                    Console.Write("Service name: ");
+                    serviceName = Console.ReadLine();
+                    if (string.IsNullOrEmpty(serviceName))
+                    {
+                        do
+                        {
+                            Console.WriteLine("Service name can't be left empty, please insert value:");
+                            serviceName = Console.ReadLine();
+                        } while (string.IsNullOrEmpty(serviceName));
+                    }
+                }
+                else
+                {
+                    var log = new Logger();
+                    log.Log(ex.Message);
+                }
+            }
+        }
 
         nodes = await sql.GetUsersServicesAsync(userName);
         int serviceId = await sql.GetNewestServiceId();
